@@ -1,0 +1,361 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ibnatu 's Calculator</title>
+  <style>
+    :root {
+      --bg: #f6f8ff;
+      --panel: #ffffff;
+      --text: #0f172a; /* slate-900 */
+      --subtext: #475569; /* slate-600 */
+      --primary: #1e40af; /* blue-800 */
+      --primary-acc: #3b82f6; /* blue-500 */
+      --accent: #dc2626; /* red-600 */
+      --accent-acc: #ef4444; /* red-500 */
+      --border: #e2e8f0; /* slate-200 */
+      --shadow: 0 20px 40px rgba(2, 6, 23, .08);
+      --btn: #f8fafc; /* slate-50 */
+      --btn-hover: #eef2ff; /* indigo-50 */
+      --btn-active: #e0e7ff; /* indigo-100 */
+    }
+    .dark {
+      --bg: #0b1020;
+      --panel: #0f172a;
+      --text: #e5e7eb;
+      --subtext: #cbd5e1;
+      --primary: #60a5fa; /* blue-400 */
+      --primary-acc: #93c5fd; /* blue-300 */
+      --accent: #f87171; /* red-400 */
+      --accent-acc: #fecaca; /* red-200 */
+      --border: #1f2937;
+      --shadow: 0 20px 40px rgba(15, 23, 42, .6);
+      --btn: #111827;
+      --btn-hover: #0b1329;
+      --btn-active: #0d1a33;
+    }* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: radial-gradient(1200px 600px at 10% -10%, var(--primary-acc)/12%, transparent 60%),
+              radial-gradient(1000px 600px at 110% 10%, var(--accent-acc)/12%, transparent 60%),
+              var(--bg);
+  color: var(--text);
+  font: 500 16px/1.4 Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  display: grid;
+  place-items: center;
+  padding: 28px 16px;
+}
+
+.app {
+  width: 100%;
+  max-width: 410px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0)) padding-box,
+              linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%) border-box;
+  border: 2px solid transparent;
+  border-radius: 24px;
+  box-shadow: var(--shadow);
+  position: relative;
+}
+
+.chrome {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 14px 0 14px;
+}
+
+.brand {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-weight: 700; letter-spacing: .3px;
+}
+.dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent), transparent 80%);
+}
+
+.toggles { display: inline-flex; gap: 8px; }
+.toggle-btn {
+  appearance: none; border: 0; cursor: pointer;
+  padding: 8px 12px; border-radius: 999px;
+  background: var(--btn);
+  color: var(--text);
+  border: 1px solid var(--border);
+  font-weight: 600;
+  transition: transform .08s ease, background .2s ease, box-shadow .2s ease;
+}
+.toggle-btn:hover { background: var(--btn-hover); }
+.toggle-btn:active { transform: translateY(1px); background: var(--btn-active); }
+
+.calculator {
+  padding: 14px;
+}
+
+.display {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 16px 14px;
+  min-height: 96px;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 6px;
+  overflow: hidden;
+}
+.history {
+  color: var(--subtext);
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-height: 20px;
+}
+.result {
+  font-size: clamp(28px, 6vw, 40px);
+  font-weight: 800;
+  justify-self: end;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.keys {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+button.key {
+  appearance: none; border: none; cursor: pointer;
+  border-radius: 16px;
+  padding: 18px 14px;
+  font-size: 18px; font-weight: 700;
+  background: var(--btn);
+  color: var(--text);
+  border: 1px solid var(--border);
+  transition: transform .06s ease, box-shadow .2s ease, background .15s ease, filter .2s ease;
+  box-shadow: 0 1px 0 rgba(2,6,23,.04);
+  will-change: transform;
+  user-select: none;
+}
+button.key:hover { background: var(--btn-hover); }
+button.key:active { transform: translateY(1px) scale(0.995); }
+
+.key.op { background: color-mix(in oklab, var(--primary-acc), white 75%); }
+.key.op:hover { background: color-mix(in oklab, var(--primary-acc), white 65%); }
+
+.key.equals {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: white; border: 0; box-shadow: 0 8px 24px color-mix(in oklab, var(--primary), black 70%);
+}
+.key.equals:hover { filter: brightness(1.04); }
+
+.key.clear { background: color-mix(in oklab, var(--accent-acc), white 70%); }
+.key.clear:hover { background: color-mix(in oklab, var(--accent-acc), white 60%); }
+
+.key.wide { grid-column: span 2; }
+
+/* Accessibility focus */
+.key:focus-visible, .toggle-btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Subtle entrance animation */
+@keyframes popin { from { transform: translateY(8px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
+.app { animation: popin .5s ease both; }
+
+footer { text-align: center; font-size: 12px; color: var(--subtext); padding: 6px 0 12px; }
+a { color: var(--primary); text-decoration: none; }
+
+  </style>
+</head>
+<body>
+  <main class="app" role="application" aria-label="Calculator">
+    <div class="chrome">
+      <div class="brand" aria-hidden="true">
+        <span class="dot"></span>
+        <span>Ibnatu 's Calc</span>
+      </div>
+      <div class="toggles">
+        <button id="themeToggle" class="toggle-btn" aria-pressed="false" aria-label="Toggle dark mode">🌙 Dark</button>
+      </div>
+    </div><section class="calculator">
+  <div class="display" aria-live="polite">
+    <div id="history" class="history" title="Expression history"></div>
+    <div id="result" class="result" title="Current value">0</div>
+  </div>
+
+  <div class="keys" role="group" aria-label="Calculator keys">
+    <button class="key clear wide" data-action="clear" aria-label="Clear">C</button>
+    <button class="key" data-action="backspace" aria-label="Backspace">⌫</button>
+    <button class="key op" data-op="/" aria-label="Divide">÷</button>
+
+    <button class="key" data-num="7">7</button>
+    <button class="key" data-num="8">8</button>
+    <button class="key" data-num="9">9</button>
+    <button class="key op" data-op="*" aria-label="Multiply">×</button>
+
+    <button class="key" data-num="4">4</button>
+    <button class="key" data-num="5">5</button>
+    <button class="key" data-num="6">6</button>
+    <button class="key op" data-op="-" aria-label="Subtract">−</button>
+
+    <button class="key" data-num="1">1</button>
+    <button class="key" data-num="2">2</button>
+    <button class="key" data-num="3">3</button>
+    <button class="key op" data-op="+" aria-label="Add">+</button>
+
+    <button class="key wide" data-num="0">0</button>
+    <button class="key" data-action="decimal">.</button>
+    <button class="key equals" data-action="equals" aria-label="Equals">=</button>
+  </div>
+</section>
+<footer>Built by <a href="#" aria-hidden="true">Hafsa</a>, <a href="#" aria-hidden="true">Yakub</a> <a href="#" aria-hidden="true">Muhammad</a></footer>
+
+  </main>  <script>
+    (() => {
+      const historyEl = document.getElementById('history');
+      const resultEl = document.getElementById('result');
+      const keys = document.querySelector('.keys');
+      const themeToggle = document.getElementById('themeToggle');
+
+      // Calculator state
+      let first = null; // number
+      let operator = null; // '+', '-', '*', '/'
+      let awaitingSecond = false; // after operator press
+      let justEvaluated = false;
+
+      function format(n) {
+        if (!isFinite(n)) return '∞';
+        const str = (Math.round((n + Number.EPSILON) * 1e12) / 1e12).toString();
+        // Use locale for thousands if integer
+        if (Number.isInteger(Number(str))) {
+          return Number(str).toLocaleString();
+        }
+        // Trim trailing zeros
+        return str.replace(/\.?(0+)$/, '');
+      }
+
+      function setResult(text) {
+        resultEl.textContent = text;
+      }
+
+      function appendDigit(d) {
+        const cur = resultEl.textContent;
+        if (justEvaluated) { // start fresh after equals
+          setResult(d);
+          historyEl.textContent = '';
+          first = null; operator = null; awaitingSecond = false; justEvaluated = false;
+          return;
+        }
+        if (awaitingSecond) {
+          setResult(d);
+          awaitingSecond = false;
+          return;
+        }
+        if (cur === '0') setResult(d); else setResult(cur + d);
+      }
+
+      function addDecimal() {
+        const cur = resultEl.textContent;
+        if (awaitingSecond || justEvaluated) {
+          setResult('0.'); awaitingSecond = false; justEvaluated = false; return;
+        }
+        if (!cur.includes('.')) setResult(cur + '.');
+      }
+
+      function doOp(nextOp) {
+        const curVal = parseFloat(resultEl.textContent.replace(/,/g, ''));
+        if (first === null) {
+          first = curVal;
+        } else if (!awaitingSecond) {
+          // chain operations
+          const computed = compute(first, operator, curVal);
+          first = computed;
+          setResult(format(computed));
+        }
+        operator = nextOp;
+        historyEl.textContent = `${format(first)} ${symbol(nextOp)}`;
+        awaitingSecond = true; justEvaluated = false;
+      }
+
+      function equals() {
+        if (operator === null || awaitingSecond) return;
+        const second = parseFloat(resultEl.textContent.replace(/,/g, ''));
+        const computed = compute(first, operator, second);
+        historyEl.textContent = `${format(first)} ${symbol(operator)} ${format(second)} =`;
+        setResult(isNaN(computed) ? 'Error' : format(computed));
+        first = null; operator = null; awaitingSecond = false; justEvaluated = true;
+      }
+
+      function compute(a, op, b) {
+        switch (op) {
+          case '+': return a + b;
+          case '-': return a - b;
+          case '*': return a * b;
+          case '/': return b === 0 ? NaN : a / b;
+          default: return b;
+        }
+      }
+
+      function symbol(op) {
+        return ({'+': '+', '-': '−', '*': '×', '/': '÷'})[op] || op;
+      }
+
+      function clearAll() {
+        first = null; operator = null; awaitingSecond = false; justEvaluated = false;
+        setResult('0'); historyEl.textContent = '';
+      }
+
+      function backspace() {
+        if (awaitingSecond || justEvaluated) return; // don't modify when expecting input or just evaluated
+        let cur = resultEl.textContent;
+        if (cur.length <= 1 || (cur.length === 2 && cur.startsWith('-'))) {
+          setResult('0');
+        } else {
+          setResult(cur.slice(0, -1));
+        }
+      }
+
+      keys.addEventListener('click', (e) => {
+        const btn = e.target.closest('button.key');
+        if (!btn) return;
+        const num = btn.getAttribute('data-num');
+        const op = btn.getAttribute('data-op');
+        const act = btn.getAttribute('data-action');
+        if (num !== null) return appendDigit(num);
+        if (op !== null) return doOp(op);
+        if (act === 'equals') return equals();
+        if (act === 'clear') return clearAll();
+        if (act === 'decimal') return addDecimal();
+        if (act === 'backspace') return backspace();
+      });
+
+      // Keyboard support
+      window.addEventListener('keydown', (e) => {
+        const { key } = e;
+        if (/^[0-9]$/.test(key)) { appendDigit(key); return; }
+        if (key === '.') { addDecimal(); return; }
+        if (key === '+' || key === '-' || key === '*' || key === '/') { doOp(key); e.preventDefault(); return; }
+        if (key === 'Enter' || key === '=') { equals(); e.preventDefault(); return; }
+        if (key === 'Escape') { clearAll(); return; }
+        if (key === 'Backspace') { backspace(); return; }
+      });
+
+      // Theme toggle
+      themeToggle.addEventListener('click', () => {
+        const isDark = document.body.classList.toggle('dark');
+        themeToggle.setAttribute('aria-pressed', String(isDark));
+        themeToggle.textContent = isDark ? '☀️ Light' : '🌙 Dark';
+      });
+
+      // Respect user preference initially
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+        themeToggle.setAttribute('aria-pressed', 'true');
+        themeToggle.textContent = '☀️ Light';
+      }
+    })();
+  </script></body>
+</html>
